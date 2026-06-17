@@ -1,15 +1,34 @@
 from selenium.webdriver.common.by import By
 from datetime import datetime
+import re
+import unicodedata
 
 def normalizar_texto(texto):
-    """Unifica comillas, guiones y espacios para evitar fallos por errores de tipeo en la web."""
+    """
+    Limpia el texto para hacer comparaciones exactas sin importar
+    acentos, mayúsculas, signos de puntuación raros o espacios extra.
+    """
+    if not texto:
+        return ""
+    
+    # 1. Convertir a minúsculas
     texto = texto.lower()
-    texto = texto.replace('“', '"').replace('”', '"').replace("'", '"')
-    texto = texto.replace('–', '-').replace('—', '-')
-    # Elimina automáticamente los dobles espacios
-    return ' '.join(texto.split())
+    
+    # 2. Eliminar acentos (reemplaza á por a, ü por u, etc.)
+    texto = ''.join(c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn')
+    
+    # 3. Reemplazar caracteres especiales, comillas tipográficas y guiones por espacios
+    texto = re.sub(r'[“”"\'\-\.,_–]', ' ', texto)
+    
+    # 4. Estandarizar la abreviatura de Número (N°, N.º, Nro) a simplemente " n "
+    texto = re.sub(r'n\s*[°º]', ' n ', texto)
+    
+    # 5. Eliminar espacios múltiples dejándolos en un solo espacio
+    texto = re.sub(r'\s+', ' ', texto).strip()
+    
+    return texto
 
-def obtener_articulos_pagina(driver, titulos_buscar):
+def obtener_articulos_pagina(driver, escuelas_clave):
     """
     Extrae los artículos de la página actual y recolecta todas las fechas vistas
     para llevar un control general del tiempo.
@@ -22,9 +41,6 @@ def obtener_articulos_pagina(driver, titulos_buscar):
     # Respaldo de seguridad por si cambia el diseño de la página
     if not contenedores_articulos:
         contenedores_articulos = driver.find_elements(By.XPATH, '//div[h3/a]')
-
-    # Normalizamos los títulos de las escuelas que buscamos
-    titulos_buscar_norm = [normalizar_texto(t) for t in titulos_buscar]
 
     for contenedor in contenedores_articulos:
         try:
@@ -44,8 +60,13 @@ def obtener_articulos_pagina(driver, titulos_buscar):
             # Normalizamos el título extraído de la web
             titulo_norm = normalizar_texto(titulo)
 
-            # Comprobación flexible
-            es_coincidencia = any(t in titulo_norm or titulo_norm in t for t in titulos_buscar_norm)
+            # Comprobación flexible iterando sobre el diccionario de palabras clave
+            es_coincidencia = False
+            for nombre_escuela, palabras_clave in escuelas_clave.items():
+                # Verificamos si TODAS las palabras clave están en el título normalizado
+                if all(palabra in titulo_norm for palabra in palabras_clave):
+                    es_coincidencia = True
+                    break
 
             if es_coincidencia:
                 fecha_obj = datetime.strptime(fecha_texto, "%d/%m/%Y")

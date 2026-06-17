@@ -9,25 +9,16 @@ from scraping_articulos import obtener_articulos_pagina
 from extraccion_nombres import obtener_nombres_del_articulo
 
 def main():
-    # Todas las variaciones posibles de los nombres
-    titulos = [
-            # --- Variaciones Escuela 1 ---
-            'Esc. Educ. Técnica N°1 “Brigadier Gral. Pascual Echague” – Concordia',
-            'E E Técnica N°1 “Brigadier Gral. Pascual Echague” – Concordia',
-            'E. E. Técnica N°1 “Brigadier Gral. Pascual Echague” – Concordia',
-            'E.E. Técnica N° 1 “Brigadier Gral. Pascual Echagüe” – Concordia',
-            
-            # --- Variaciones Escuela 2 ---
-            'E.E.T. N° 2 “Independencia” – Anexo de Formación Profesional – Concordia',
-            'E. E. T. N° 2 “Independencia” – Anexo de Formación Profesional – Concordia',
-            'E.E.T N° 2 “Independencia” – Anexo de Formación Profesional – Concordia',
-
-            # --- escuela 3 ---
-            'Escuela de Educación Agrotécnica N° 152 “M. M. Calderón” – Concordia', 
-            
-            # --- escuela 4 ---
-            'Escuela de Educación Agrotécnica N.º 24 “Gral. San Martín” – Concordia'
-        ]
+    # ==========================================
+    # NUEVA CONFIGURACIÓN: BÚSQUEDA ROBUSTA
+    # Reemplazamos la lista de títulos exactos por palabras clave
+    # ==========================================
+    escuelas_clave = {
+        "Tecnica 1 Pascual Echague": ("tecnica", " n 1 ", "echague"),
+        "Tecnica 2 Independencia": ("tecnica", " n 2 ", "independencia"),
+        "Agrotecnica 152 Calderon": ("agrotecnica", "152", "calderon"),
+        "Agrotecnica 24 San Martin": ("agrotecnica", "24", "san martin")
+    }
 
     # ==========================================
     # CONFIGURACIÓN DE VISIBILIDAD (DEBUG)
@@ -37,7 +28,6 @@ def main():
     edge_options = Options()
     edge_options.add_argument("--start-maximized")
     edge_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    edge_options.add_experimental_option("detach", True)
 
     if VER_NAVEGADOR:
         # Si estamos debuggeando, evitamos que la ventana se cierre de golpe
@@ -67,7 +57,8 @@ def main():
         driver.get(url)
         driver.implicitly_wait(5)
 
-        articulos_pagina, fechas_vistas = obtener_articulos_pagina(driver, titulos)
+        # AHORA PASAMOS EL DICCIONARIO 'escuelas_clave' EN LUGAR DE 'titulos'
+        articulos_pagina, fechas_vistas = obtener_articulos_pagina(driver, escuelas_clave)
 
         fechas_globales.update(fechas_vistas)
         articulos_encontrados.extend(articulos_pagina)
