@@ -1,0 +1,12 @@
+# Bytecode de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entorno virtual
+.venv/
+venv/
+
+# Otros temporales comunes
+*.log
+.DS_Store
