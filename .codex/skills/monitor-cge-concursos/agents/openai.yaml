@@ -1,0 +1,4 @@
+interface:
+  display_name: "Monitorear concursos CGE"
+  short_description: "Ejecuta y resume novedades de concursos CGE"
+  default_prompt: "Usa $monitor-cge-concursos para consultar las novedades de concursos."

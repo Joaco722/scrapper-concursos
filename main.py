@@ -7,18 +7,14 @@ from datetime import datetime
 # Importamos nuestras funciones
 from scraping_articulos import obtener_articulos_pagina
 from extraccion_nombres import obtener_nombres_del_articulo
+from servicio_concursos import ESCUELAS_CLAVE
 
 def main():
     # ==========================================
     # NUEVA CONFIGURACIÓN: BÚSQUEDA ROBUSTA
     # Reemplazamos la lista de títulos exactos por palabras clave
     # ==========================================
-    escuelas_clave = {
-        "Tecnica 1 Pascual Echague": ("tecnica", " n 1 ", "echague"),
-        "Tecnica 2 Independencia": ("tecnica", " n 2 ", "independencia"),
-        "Agrotecnica 152 Calderon": ("agrotecnica", "152", "calderon"),
-        "Agrotecnica 24 San Martin": ("agrotecnica", "24", "san martin")
-    }
+    escuelas_clave = ESCUELAS_CLAVE
 
     # ==========================================
     # CONFIGURACIÓN DE VISIBILIDAD (DEBUG)

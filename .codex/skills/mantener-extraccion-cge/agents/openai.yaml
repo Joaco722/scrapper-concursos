@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mantener extracción CGE"
+  short_description: "Repara cambios en la extracción del sitio CGE"
+  default_prompt: "Usa $mantener-extraccion-cge para diagnosticar una falla de extracción."

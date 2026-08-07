@@ -1,0 +1,4 @@
+interface:
+  display_name: "Configurar escuelas CGE"
+  short_description: "Actualiza las escuelas seguidas y sus criterios"
+  default_prompt: "Usa $configurar-escuelas-cge para agregar una escuela al seguimiento."
