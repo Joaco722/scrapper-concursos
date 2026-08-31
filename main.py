@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.edge.options import Options
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import WebDriverException
 import time
 from datetime import datetime
 
@@ -8,6 +9,24 @@ from datetime import datetime
 from scraping_articulos import obtener_articulos_pagina
 from extraccion_nombres import obtener_nombres_del_articulo
 from servicio_concursos import ESCUELAS_CLAVE
+
+
+def cargar_pagina(driver, url, intentos=3, espera_reintento=5):
+    """
+    Intenta cargar una URL, reintentando ante fallos de conexión (sitio caído,
+    timeout de red, etc.) en vez de dejar que el error rompa el programa.
+    Devuelve True si logró cargar la página, False si se agotaron los intentos.
+    """
+    for intento in range(1, intentos + 1):
+        try:
+            driver.get(url)
+            return True
+        except WebDriverException:
+            print(f"   -> No se pudo conectar (intento {intento}/{intentos})...")
+            if intento < intentos:
+                time.sleep(espera_reintento)
+    return False
+
 
 def main():
     # ==========================================
@@ -50,7 +69,14 @@ def main():
     while True:
         url = base_url if pagina == 1 else f"{base_url}page/{pagina}/"
         print(f"Procesando página {pagina}...")
-        driver.get(url)
+
+        if not cargar_pagina(driver, url):
+            print(f"\nNo se pudo conectar a {base_url}.")
+            print("El sitio del CGE podría estar caído, lento o inaccesible en este momento.")
+            print("Verificá tu conexión a internet e intentá de nuevo más tarde.")
+            driver.quit()
+            return
+
         driver.implicitly_wait(5)
 
         # AHORA PASAMOS EL DICCIONARIO 'escuelas_clave' EN LUGAR DE 'titulos'
@@ -102,6 +128,8 @@ def main():
             articulo['fecha_sorteo'] = info_nombres['fecha_sorteo']
             articulo['materias'] = info_nombres['materias']
             resultados_finales.append(articulo)
+        except WebDriverException:
+            print("   -> Error de conexión al abrir el artículo, saltando...")
         except Exception as e:
             print(f"Error extrayendo datos del artículo, saltando... ({e})")
 
